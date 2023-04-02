@@ -1,17 +1,15 @@
 #!/bin/bash
 
-confirm() {
-  read -p "Press any key to continue!!"
-}
-
 format() {
   echo "Formating disk"
-  confirm
+
+  swapoff /dev/sb2
+  umount -R /mnt
 
   mkswap /dev/sdb2
-  mkfs.ext4 -l root /dev/sdb3
-  mkfs.ext4 -l home /dev/sdb4
-  mkfs.fat -F32 -l boot /dev/sdb1
+  mkfs.ext4 -L root /dev/sdb3
+  mkfs.ext4 -L home /dev/sdb4
+  mkfs.fat -F32 -n boot /dev/sdb1
 
 
   echo "Mouting files"
@@ -24,7 +22,6 @@ format() {
 
 base_install() {
   echo "Installing Arch"
-  confirm
   pacstrap -K /mnt base linux linux-firmware
   genfstab -U /mnt >> /mnt/etc/fstab
 }
@@ -32,7 +29,6 @@ base_install() {
 
 install_x() {
   echo "Installing X"
-  confirm
   pacman -S --noconfirm nvidia nvidia-settings nvidia-utils
   pacman -S --noconfirm xorg xorg-xinit xorg-xev arandr
   pacman -S --noconfirm awesomewm
@@ -45,21 +41,18 @@ EOF
 
 install_audio() {
   echo "Installing Audio"
-  confirm
   pacman -S --noconfirm pulseaudio pulseaudio-alsa pavucontrol-qt alsa-utils
 }
 
 set_timezone() {
   echo "Setting TZ"
-  confirm
   ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
   hwclock --systohc
 }
 
 set_locale() {
   echo "Setting locale"
-  confirm
-  cat <<EOF> /tmp/teste
+  cat <<EOF> /etc/locale.gen
 en_US.UTF-8 UTF-8
 pt-BR.UTF-8 UTF-8
 EOF
@@ -69,34 +62,30 @@ EOF
 
 create_user() {
   echo "Create user"
-  confirm
   useradd -m -s /bin/zsh -G wheel "rmarra"
   echo -en "123456\n123456" | passwd "rmarra"
 }
 
 setup_sudo() {
   echo "Setup SUDO"
-  confirm
   pacman -S --noconfirm sudo
   echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
 }
 
 config_misc() {
   echo "Config MISC"
-  confirm
   echo "KEYMAP=us-acentos" >> /etc/vconsole.conf
   echo "paddle" > /etc/hostname
 }
 
 config_bootctl() {
   echo "bootinstall"
-  confirm
   bootctl install
   cat <<EOF >> /boot/loader/entries/arch.conf
 title   Arch Linux
 linux   /vmlinuz-linux
 initrd  /initramfs-linux.img
-options root=LABEL=root ibt=off nvidia_drm.modeset=1 rw
+options root=LABEL=root rw
 EOF
 }
 
