@@ -3,5 +3,5 @@
 
 # TODO:
 
-[] pass partition by param
-[] load/config dotfiles from github
+[ ] pass partition by param
+[ ] load/config dotfiles from github
